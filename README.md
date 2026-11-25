@@ -4,6 +4,9 @@ A two-tier network on Microsoft Azure: a public web tier and a private SQL Serve
 
 **Security goal:** the database is never reachable from the internet, and inside the network only the web subnet can reach it, on port 1433 only.
 
+## 🎥 Video Walkthrough
+[▶️ Watch the full Azure build walkthrough on Loom](https://www.loom.com/share/b0554f2eb69346408220014a7a0b5a0a)
+
 ## 📐 Architecture
 ![Lab 02 network topology: public web subnet and private database subnet on Azure](Lab02_Topology.png)
 
