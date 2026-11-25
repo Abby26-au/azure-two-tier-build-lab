@@ -1,14 +1,11 @@
-# Lab 02: Two-Tier Architecture on Azure
+# Lab 02: Building a Secure 2-Tier Web Application on Azure
 
 A two-tier network on Microsoft Azure: a public web tier and a private SQL Server tier, separated by network security groups that allow exactly one path to the data.
 
 **Security goal:** the database is never reachable from the internet, and inside the network only the web subnet can reach it, on port 1433 only.
 
-## 🎥 Video Walkthrough
-[▶️ Watch the full Azure build walkthrough on Loom](PASTE-NEW-LOOM-LINK)
-
 ## 📐 Architecture
-![Lab 02 architecture: public web subnet and private database subnet on Azure](architecture-build.png)
+![Lab 02 network topology: public web subnet and private database subnet on Azure](Lab02_Topology.png)
 
 ### Traffic flow and security boundaries
 Solid lines are allowed traffic. Dotted lines are blocked.
@@ -49,8 +46,8 @@ flowchart LR
 | Virtual network | `vnet-two-tier` | 10.0.0.0/16 |
 | Web subnet | `snet-web` | 10.0.1.0/24, protected by `nsg-web` |
 | Data subnet | `snet-db` | 10.0.2.0/24, protected by `nsg-db` |
-| Web VM | `vm-web` | Ubuntu Server 24.04 LTS, nginx, public IP |
-| Database VM | `vm-db` | SQL Server 2022 Developer on Ubuntu 22.04, **no public IP** |
+| Web VM | `vm-web` | Ubuntu Server 24.04 LTS, nginx, public IP, 10.0.1.4 |
+| Database VM | `vm-db` | SQL Server 2022 Developer on Ubuntu 22.04, 10.0.2.4, **no public IP** |
 
 ## 🔐 Security Design
 
@@ -74,7 +71,7 @@ flowchart LR
 - **Explicit VNet deny.** Azure's default `AllowVnetInBound` rule (priority 65000) lets all traffic inside a VNet through. The deny rule at priority 4000 limits the web tier to SQL only.
 
 ## 🛠️ Build Steps
-1. Create the resource group `rg-two-tier`
+1. Create the resource group `rg-two-tier` in East US
 2. Create `vnet-two-tier` with subnets `snet-web` and `snet-db`
 3. Create `nsg-web` and `nsg-db` with the rules above
 4. Associate each NSG with its subnet
@@ -84,8 +81,6 @@ flowchart LR
 8. Set the SA password and start SQL Server on `vm-db` with Run command
 9. Run the validation tests below
 
-Full step-by-step instructions: [Lab 02 Build Guide (PDF)](Lab02_Build_Guide.pdf)
-
 ## ✅ Validation
 
 | # | Test | Expected | Result |
@@ -94,34 +89,3 @@ Full step-by-step instructions: [Lab 02 Build Guide (PDF)](Lab02_Build_Guide.pdf
 | 2 | `vm-web` → `vm-db` on port 1433 | OPEN | Pending |
 | 3 | `vm-web` → `vm-db` on port 22 | BLOCKED | Pending |
 | 4 | Internet → `vm-db` on port 1433 (IP flow verify) | Access denied | Pending |
-
-## 📸 Evidence
-
-| Evidence | File |
-|---|---|
-| Resource group with all resources | [evidence-01-resource-group.png](evidence-01-resource-group.png) |
-| Subnets with NSGs attached | [evidence-02-subnets.png](evidence-02-subnets.png) |
-| NSG inbound rules | [evidence-03-nsg-rules.png](evidence-03-nsg-rules.png) |
-| `vm-db` with no public IP | [evidence-04-db-no-public-ip.png](evidence-04-db-no-public-ip.png) |
-| Test 1: web page in browser | [evidence-05-test-web.png](evidence-05-test-web.png) |
-| Tests 2 and 3: port checks | [evidence-06-test-ports.png](evidence-06-test-ports.png) |
-| Test 4: IP flow verify | [evidence-07-test-ip-flow.png](evidence-07-test-ip-flow.png) |
-
-## 📄 Documents
-- [Lab 02 Build Guide (PDF)](Lab02_Build_Guide.pdf): every step, rule and test to reproduce this lab
-- [LinkedIn carousel: the build (PDF)](LinkedIn_Carousel_Lab02_Build.pdf)
-- [LinkedIn carousel: the design (PDF)](LinkedIn_Carousel_Lab02_Two_Tier_Architecture.pdf)
-- [Editable design diagram (draw.io)](Azure_Two_Tier_Architecture.drawio)
-- [Original design diagram (PNG)](architecture.png)
-
-## 🧠 Skills Demonstrated
-Azure Virtual Networks · Subnetting · Network Security Groups · Least privilege · Defense in depth · Linux VMs · SQL Server on Linux · Azure Run command · Network Watcher · Security validation testing
-
-## 🧹 Cleanup
-All resources were removed by deleting the `rg-two-tier` resource group after testing, so nothing keeps billing.
-
-## ⏭️ Next Steps
-- Add a TLS certificate so the web tier serves HTTPS
-- Use Azure Bastion for admin access
-- Turn on NSG flow logs and Microsoft Defender for Cloud
-- Compare this design with Azure SQL Database and a private endpoint
